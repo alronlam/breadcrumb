@@ -4,6 +4,8 @@ import ins.INSController;
 
 import java.util.ArrayList;
 
+import mapping.Mapper;
+import mapping.TextMapper;
 import android.app.Activity;
 import android.content.Context;
 import android.hardware.Sensor;
@@ -31,6 +33,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 	
 	//INS related
 	private INSController insController;
+	private Mapper mapper;
 	private ArrayList<SensorEntry> sensorEntryBatch;
 	
 	
@@ -45,6 +48,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         
         sensorEntryBatch = new ArrayList<SensorEntry>();
         insController = new INSController();
+        mapper = new TextMapper();
     }
     
     protected void onPause() {
@@ -91,46 +95,19 @@ public class MainActivity extends Activity implements SensorEventListener {
 	    		this.timeStampOfLastSensorEntry = currNanoTime;
 	    	}
 	    	
-	    	// run the batch through the INS
+	    	
 	    	if(System.nanoTime() - this.timeStampOfLastStepDetection >= this.stepDetectorTimeInterval){
-	    		//change this in the future so the results will come from v-ins controller when the system is in hand mode
+	    		/*
+		    	 * For now, the sensor entries are being processed by the INS.
+		    	 * In the future, insert the phone mode detection here and just switch to INS or V-INS accordingly.
+		    	 */
 	    		BatchProcessingResults results = this.insController.processSensorEntryBatch(this.sensorEntryBatch);
 	    		
 	    		//feed the results to the mapping module
+	    		mapper.plot(this, results);
 	    		
-	    		//temporary implementation
-	    		TextView tvTotalStepsDetected= (TextView)findViewById(R.id.tvTotalStepsDetected);
-	    		TextView tvLastStepsDetected = (TextView)findViewById(R.id.tvLastStepsDetected);
-	    		TextView tvLastStrideLength= (TextView)findViewById(R.id.tvLastStrideLength);
-	    		TextView tvTotalStrideLength= (TextView)findViewById(R.id.tvTotalStrideLength);
-	    		
-	    		long totalStepsDetected = 0;
-	    		try{
-	    			totalStepsDetected = Long.parseLong(tvTotalStepsDetected.getText().toString());
-	    		}catch(Exception e){}
-	    		
-	    		double totalStrideLength = 0;
-	    		try{
-	    			totalStrideLength = Double.parseDouble(tvTotalStrideLength.getText().toString());
-	    		}catch(Exception e){}
-	    		
-	    		
-	    		totalStepsDetected += results.getDetectedSteps();
-	    		totalStrideLength += results.getStrideLength();
-	    		
-	    		if(results.getDetectedSteps() > 0)
-	    			tvLastStepsDetected.setText(""+results.getDetectedSteps());
-	    		if(results.getStrideLength() > 0)
-	    			tvLastStrideLength.setText(""+results.getStrideLength());
-	    		
-	    		tvTotalStepsDetected.setText(""+totalStepsDetected);
-	    		tvTotalStrideLength.setText(""+totalStrideLength);
-	    		
-//	    		Log.d("Total Steps", ""+totalStepsDetected);
-//	    		Log.d("Total Stride Length", ""+totalStrideLength);
-//	    		
-	    		
-	    		this.sensorEntryBatch.clear(); //clear the processed entries for the new batch
+	    		//clear the processed entries for the new batch
+	    		this.sensorEntryBatch.clear(); 
 	    	}
 	    }
 	}
