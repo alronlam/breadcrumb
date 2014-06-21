@@ -1,9 +1,13 @@
 package ins;
 
+import headingdetermination.HeadingDeterminer;
+import headingdetermination.SimpleHeadingDeterminer;
+
 import java.util.ArrayList;
 
-import android.util.Log;
+import stepdetection.PeakThresholdStepDetector;
 import stepdetection.StepDetector;
+import stridelengthestimation.LinearStrideLengthEstimator;
 import stridelengthestimation.StrideLengthEstimator;
 import data.BatchProcessingResults;
 import data.DetectedEntry;
@@ -11,34 +15,35 @@ import data.SensorEntry;
 
 public class INSController {
 
-	
+	//Plan to make all these three interfaces so we can easily switch techniques. Just not sure yet what parameters are needed.
 	private StepDetector stepDetector;
 	private StrideLengthEstimator strideLengthEstimator;
+	private HeadingDeterminer headingDeterminer;
 	
 	
 	public INSController(){
-		this.stepDetector = new StepDetector();
-		this.strideLengthEstimator = new StrideLengthEstimator();
+		this.stepDetector = new PeakThresholdStepDetector();
+		this.strideLengthEstimator = new LinearStrideLengthEstimator();
+		this.headingDeterminer = new SimpleHeadingDeterminer();
 	}
 	
 	public BatchProcessingResults processSensorEntryBatch(ArrayList<SensorEntry> batch){
 		
-		//run through step detection
+		//Step detection
 		ArrayList<DetectedEntry> detectedSteps = stepDetector.detectSteps(batch);
-		//if true, then estimate stride length
 		
-		double stepRate = 1.0*detectedSteps.size()/ 1000; //ms 
-		double strideLength = strideLengthEstimator.estimateLength(stepRate);
+		//Stride length estimation
+		double strideLength = strideLengthEstimator.estimateLength(detectedSteps);
 		
-		//determine heading
-		
+		//Heading determination
+		double headingAngle = headingDeterminer.getHeading(batch);
 		
 		//return results
 		BatchProcessingResults results = new BatchProcessingResults();
 		results.setDetectedSteps(detectedSteps.size());
 		results.setStrideLength(strideLength);
-//		Log.d("Detected Steps", ""+results.getDetectedSteps());
-//		Log.d("Stride Length", ""+results.getStrideLength());
+		results.setHeadingAngle(headingAngle);
+		
 		return results;
 	}
 	

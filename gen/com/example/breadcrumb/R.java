@@ -1130,8 +1130,10 @@ containing a value of this type.
         public static final int textView2=0x7f05003e;
         public static final int textView3=0x7f050042;
         public static final int textView4=0x7f050041;
+        public static final int textView5=0x7f050044;
         public static final int title=0x7f05002b;
         public static final int top_action_bar=0x7f050020;
+        public static final int tvLastHeadingAngle=0x7f050045;
         public static final int tvLastStepsDetected=0x7f05003d;
         public static final int tvLastStrideLength=0x7f05003f;
         public static final int tvTotalStepsDetected=0x7f050040;
