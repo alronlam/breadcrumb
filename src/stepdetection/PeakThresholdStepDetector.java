@@ -9,7 +9,7 @@ import data.SensorEntry;
 public class PeakThresholdStepDetector implements StepDetector{
 	
 	private final double PEAK_THRESHOLD = 12;
-	private final double TIME_GAP = 520000; //ns
+	private final double TIME_GAP = 520000000; //ns
 	
 	private long detectedCount = 0;
 	private DetectedEntry lastDetectedEntry;
@@ -29,15 +29,17 @@ public class PeakThresholdStepDetector implements StepDetector{
         for ( int i = 0; i < size; i++ )
         {
         	SensorEntry currEntry = batch.get(i);
-            double accelerometerNorm = currEntry.getAcc_norm();
-            //Log.d("Norm is ", accelerometerNorm+"");
-            if( accelerometerNorm >= PEAK_THRESHOLD && (lastDetectedEntry == null || 
-            		(lastDetectedEntry != null && currEntry.getTimeRecorded() - lastDetectedEntry.getTimeRecorded() >= TIME_GAP ))){
-            	
-            	DetectedEntry newStep = new DetectedEntry(currEntry.getTimeRecorded(), accelerometerNorm);
-            	peaks.add(newStep);
-            	lastDetectedEntry  = newStep;
-            }
+        	if(currEntry != null){
+        		double accelerometerNorm = currEntry.getAcc_norm();
+                //Log.d("Norm is ", accelerometerNorm+"");
+                if( accelerometerNorm >= PEAK_THRESHOLD && (lastDetectedEntry == null || 
+                		(lastDetectedEntry != null && currEntry.getTimeRecorded() - lastDetectedEntry.getTimeRecorded() >= TIME_GAP ))){
+                	
+                	DetectedEntry newStep = new DetectedEntry(currEntry.getTimeRecorded(), accelerometerNorm);
+                	peaks.add(newStep);
+                	lastDetectedEntry  = newStep;
+                }	
+        	}
         }
         //Log.d("Step detector found ", peaks.size()+"");
         return peaks;

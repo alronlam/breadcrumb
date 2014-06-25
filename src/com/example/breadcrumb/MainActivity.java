@@ -31,7 +31,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private long timeStampOfLastStepDetection = 0;
 //	private long timeStampOfLastSensorEntry = 0;
 //	private long sensorEntryTimeInterval = 1000/hz * 1000; //nano seconds
-	private long stepDetectorTimeInterval = 1000000;
+	private long stepDetectorTimeInterval = 1000000000;
 	
 	//INS related
 	private INSController insController;
@@ -43,17 +43,17 @@ public class MainActivity extends Activity implements SensorEventListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        //setContentView(R.layout.activity_main);
         
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         senAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         senGyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-        //senOrientation = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION); //temporary. not sure how to use the correct one
+        senOrientation = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION); //temporary. not sure how to use the correct one
         registerListeners();
         
         sensorEntryBatch = new ArrayList<SensorEntry>();
         insController = new INSController();
-        mapper = new TextMapper();
+        mapper = new TextMapper(this);
         nextSensorEntryToAdd = new SensorEntry();
         
         timeStampOfLastStepDetection = System.nanoTime();
@@ -74,7 +74,7 @@ public class MainActivity extends Activity implements SensorEventListener {
     private void registerListeners(){
         sensorManager.registerListener(this, senAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         sensorManager.registerListener(this, senGyroscope, SensorManager.SENSOR_DELAY_FASTEST);
-        //sensorManager.registerListener(this,  senOrientation, SensorManager.SENSOR_DELAY_FASTEST);
+        sensorManager.registerListener(this,  senOrientation, SensorManager.SENSOR_DELAY_FASTEST);
     }
 
 	@Override
@@ -108,6 +108,11 @@ public class MainActivity extends Activity implements SensorEventListener {
 	 */
 	private void recordSensorEntry(){
 		this.nextSensorEntryToAdd.setTimeRecorded(System.nanoTime());
+		double x = nextSensorEntryToAdd.getOrient_x() ;
+		double y = nextSensorEntryToAdd.getOrient_y() ;
+		double z = nextSensorEntryToAdd.getOrient_z() ;
+		
+    	
 		sensorEntryBatch.add(this.nextSensorEntryToAdd);
 		this.nextSensorEntryToAdd = new SensorEntry();
 	}
@@ -179,8 +184,10 @@ public class MainActivity extends Activity implements SensorEventListener {
 	    	nextSensorEntryToAdd.setOrient_x(x);
 	    	nextSensorEntryToAdd.setOrient_y(y);
 	    	nextSensorEntryToAdd.setOrient_z(z);
+	    	
+	    	TextMapper.debug("" + String.format("%.2f", x) + " " +String.format("%.2f", y) + " " + String.format("%.2f", z) );
+
 	    }
-	    
 	    
 	    long currTime = System.nanoTime();
 	    if(currTime - this.timeStampOfLastStepDetection >= this.stepDetectorTimeInterval){
