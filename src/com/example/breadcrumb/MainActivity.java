@@ -48,11 +48,8 @@ public class MainActivity extends Activity implements SensorEventListener {
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         senAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         senGyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-        senOrientation = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION); //temporary. not sure how to use the correct one
-        
-        sensorManager.registerListener(this, senAccelerometer , SensorManager.SENSOR_DELAY_FASTEST);
-        sensorManager.registerListener(this, senGyroscope, SensorManager.SENSOR_DELAY_FASTEST);
-        sensorManager.registerListener(this,  senOrientation, SensorManager.SENSOR_DELAY_FASTEST);
+        //senOrientation = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION); //temporary. not sure how to use the correct one
+        registerListeners();
         
         sensorEntryBatch = new ArrayList<SensorEntry>();
         insController = new INSController();
@@ -71,7 +68,13 @@ public class MainActivity extends Activity implements SensorEventListener {
 
     protected void onResume() {
         super.onResume();
+        registerListeners();
+    }
+    
+    private void registerListeners(){
         sensorManager.registerListener(this, senAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(this, senGyroscope, SensorManager.SENSOR_DELAY_FASTEST);
+        //sensorManager.registerListener(this,  senOrientation, SensorManager.SENSOR_DELAY_FASTEST);
     }
 
 	@Override
@@ -104,6 +107,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 	 * Adds the object to the batch list, and then initializes a new empty SensorEntry for the next one.
 	 */
 	private void recordSensorEntry(){
+		this.nextSensorEntryToAdd.setTimeRecorded(System.nanoTime());
 		sensorEntryBatch.add(this.nextSensorEntryToAdd);
 		this.nextSensorEntryToAdd = new SensorEntry();
 	}
@@ -119,7 +123,10 @@ public class MainActivity extends Activity implements SensorEventListener {
 		BatchProcessingResults results = this.insController.processSensorEntryBatch((ArrayList<SensorEntry>)this.sensorEntryBatch.clone());
 		//clear the processed entries for the new batch
 		this.sensorEntryBatch.clear(); 
-		
+
+//    	Log.d("Steps", results.getDetectedSteps()+"");
+//    	Log.d("Distance", results.getStrideLength()+"");
+//    	Log.d("Angle", results.getHeadingAngle()+"");
 		//feed the results to the mapping module
 		mapper.plot(this, results);
 	}

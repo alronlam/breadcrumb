@@ -9,6 +9,7 @@ import stepdetection.PeakThresholdStepDetector;
 import stepdetection.StepDetector;
 import stridelengthestimation.LinearStrideLengthEstimator;
 import stridelengthestimation.StrideLengthEstimator;
+import android.util.Log;
 import data.BatchProcessingResults;
 import data.DetectedEntry;
 import data.SensorEntry;
@@ -44,6 +45,10 @@ public class INSController {
 		results.setStrideLength(strideLength);
 		results.setHeadingAngle(headingAngle);
 		
+		//Log.d("detected steps", detectedSteps.size()+"");
+//		Log.d("stride length", results.getStrideLength()+"");
+//		Log.d("heading angle", results.getHeadingAngle()+"");
+//		
 		return results;
 	}
 	

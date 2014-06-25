@@ -30,7 +30,7 @@ public class PeakThresholdStepDetector implements StepDetector{
         {
         	SensorEntry currEntry = batch.get(i);
             double accelerometerNorm = currEntry.getAcc_norm();
-            
+            //Log.d("Norm is ", accelerometerNorm+"");
             if( accelerometerNorm >= PEAK_THRESHOLD && (lastDetectedEntry == null || 
             		(lastDetectedEntry != null && currEntry.getTimeRecorded() - lastDetectedEntry.getTimeRecorded() >= TIME_GAP ))){
             	
@@ -39,6 +39,7 @@ public class PeakThresholdStepDetector implements StepDetector{
             	lastDetectedEntry  = newStep;
             }
         }
+        //Log.d("Step detector found ", peaks.size()+"");
         return peaks;
     }
 	
