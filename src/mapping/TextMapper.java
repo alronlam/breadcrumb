@@ -204,7 +204,7 @@ public class TextMapper implements Mapper {
            // write information
            paint.setColor(Color.BLACK);
            paint.setTextAlign(Align.LEFT);
-           paint.setTextSize(50);
+           paint.setTextSize(10);
            
            pathBounds = new RectF();
            path.computeBounds(pathBounds, true);
@@ -213,14 +213,14 @@ public class TextMapper implements Mapper {
         	   path.computeBounds(basePathBounds, true);
            }
            
-           canvas.drawText("Screen Size: " + getWidth() + " x " + getHeight() , 50, 50, paint);
-           canvas.drawText("Path Size: " + pathBounds.width() + " x " + pathBounds.height(), 50, 110, paint);
-           canvas.drawText("Path Position: " + pathBounds.centerX() + " x " + pathBounds.centerY(), 50, 170, paint);
-           canvas.drawText("Path Scale: " + (scale * 100) + "%", 50, 230, paint);
-           canvas.drawText(debugText, 50, 300, paint);
-           canvas.drawText("Heading: " + this.heading, 50, 360, paint);
-           canvas.drawText("Length: " + this.totalLength, 50, 420, paint);
-           canvas.drawText("Steps: " + this.totalSteps, 50, 480, paint);
+           //canvas.drawText("Screen Size: " + getWidth() + " x " + getHeight() , 50, 50, paint);
+           //canvas.drawText("Path Size: " + pathBounds.width() + " x " + pathBounds.height(), 50, 110, paint);
+           canvas.drawText("Path Position: " + pathBounds.centerX() + " x " + pathBounds.centerY(), 10, 10, paint);
+           canvas.drawText("Path Scale: " + (scale * 100) + "%", 10, 20, paint);
+           canvas.drawText(debugText, 10, 30, paint);
+           canvas.drawText("Heading: " + this.heading, 10, 40, paint);
+           canvas.drawText("Length: " + this.totalLength, 10, 50, paint);
+           canvas.drawText("Steps: " + this.totalSteps, 10, 60, paint);
            
            // draw path
            paint.setStyle(Paint.Style.STROKE);
@@ -231,12 +231,12 @@ public class TextMapper implements Mapper {
            // reference lines
            paint.setStyle(Paint.Style.FILL);
            paint.setStrokeWidth(3);
-           paint.setTextSize(40);
+           paint.setTextSize(20);
            
-           canvas.drawText("1 meter" , 50, getHeight() - 140, paint);
+           canvas.drawText("1 meter" , 10, getHeight() - 140, paint);
            canvas.drawLine(50, getHeight() - 120, 50 + (1 * pM * scale), getHeight() - 120, paint);
 
-           canvas.drawText("5 meters" , 50, getHeight() - 70, paint);
+           canvas.drawText("5 meters" , 10, getHeight() - 70, paint);
            canvas.drawLine(50, getHeight() - 50, 50 + (5 * pM * scale), getHeight() - 50, paint);
            
            //debugText = this.totalLength + " " + this.heading + " \n " + this.totalLength;
