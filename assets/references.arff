@@ -1,17 +1,31 @@
-@relation summaries_reference
+@relation summaries-weka.filters.unsupervised.attribute.Remove-R1-2-weka.filters.supervised.instance.SpreadSubsample-M1.0-X0.0-S1
 
+@attribute Accx_mean numeric
 @attribute Accx_stddev numeric
+@attribute Accx_energy numeric
+@attribute Accx_fdom numeric
+@attribute Accy_mean numeric
 @attribute Accy_stddev numeric
 @attribute Accy_energy numeric
+@attribute Accy_fdom numeric
+@attribute Accz_mean numeric
 @attribute Accz_stddev numeric
 @attribute Accz_energy numeric
+@attribute Accz_fdom numeric
+@attribute Gyrox_mean numeric
 @attribute Gyrox_stddev numeric
 @attribute Gyrox_energy numeric
+@attribute Gyrox_fdom numeric
+@attribute Gyroy_mean numeric
 @attribute Gyroy_stddev numeric
 @attribute Gyroy_energy numeric
+@attribute Gyroy_fdom numeric
+@attribute Gyroz_mean numeric
 @attribute Gyroz_stddev numeric
 @attribute Gyroz_energy numeric
+@attribute Gyroz_fdom numeric
+@attribute Accmag_fdom numeric
+@attribute Gyromag_fdom numeric
 @attribute Class {'not walking',walking}
 
 @data
-5.645089,2.337529,3733.107529,1.0,1.15773,2.024412,543.858041,2.0,7.058473,2.06182,5407.314012,walking

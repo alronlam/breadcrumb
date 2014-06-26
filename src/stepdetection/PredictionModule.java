@@ -39,38 +39,12 @@ public class PredictionModule {
     
     private AssetManager assetManager;
     
-    public PredictionModule(int classIndex, String type){
-        sb = new StringBuffer("");
-        // referenceData = openFile("C:\\Documents and Settings\\Chalsy\\Desktop\\DataCollectionPreprocessor\\Sample\\summariesReference.arff", 12);
-        referenceData = openFile("//Users//courtneyngo//Documents//MS Thesis//11082013//DataCollectionPreprocessor//Sample//summaries_reference"+type+".arff", classIndex);
-    }
-    
-    public PredictionModule( String clFile, int windowSize, int classIndex, String type ){
-        sb = new StringBuffer("");
-        String temp = "/Users/courtneyngo/Documents/MS Thesis/11082013/DataCollectionPreprocessor/Sample/summaries_reference"+type+".arff";
-        System.out.println("TEMP is " + temp);
-        referenceData = openFile(temp, classIndex);
-        this.windowSize = windowSize;
-        loadClassifier(clFile);
-    }
-    
-    public PredictionModule( int windowSize, LinkedList<SensorEntry> entries, String clFile, int classIndex, String type ){
-        sb = new StringBuffer("");
-        this.windowSize = windowSize;
-        this.entries = entries;
-        referenceData = openFile("//Users//courtneyngo//Documents//MS Thesis//11082013//DataCollectionPreprocessor//Sample//summaries_reference"+type+".arff", classIndex);
-        loadClassifier(clFile);
-        prediction = predict(summarizeEntries(entries));
-        // tag();
-    }
-    
     public PredictionModule(AssetManager assetManager){
     	this.assetManager = assetManager;
-    	String modelPath = "J48.model";
     	sb = new StringBuffer("");
     	this.windowSize= 100;
     	this.referenceData = openFile("references.arff", 12);
-    	loadClassifier(modelPath);
+    	loadClassifier("");
     }
     
     public Boolean getPrediction(){
@@ -92,22 +66,23 @@ public class PredictionModule {
     }
     
     public void loadClassifier(String filename) {
-        try {
-            System.out.println("loading classifier..." + filename);
-            Log.d("Prediction", "trying to load "+filename);
-            classifier = (Classifier) SerializationHelper.read(assetManager.open(filename));
-            Log.d("Prediction", "finished loading "+filename);
-        } catch (Exception ex) {
-            Logger.getLogger(PredictionModule.class.getName()).log(Level.SEVERE, null, ex);
-            System.err.println("loadclass " + filename);
-            Log.d("Prediction", "failed to load "+filename);
-        }
+    	classifier = new J48Classifier();
+//        try {
+//            System.out.println("loading classifier..." + filename);
+//            Log.d("Prediction", "trying to load "+filename);
+//            classifier = (Classifier) SerializationHelper.read(assetManager.open(filename));
+//            Log.d("Prediction", "finished loading "+filename);
+//        } catch (Exception ex) {
+//            Logger.getLogger(PredictionModule.class.getName()).log(Level.SEVERE, null, ex);
+//            System.err.println("loadclass " + filename);
+//            Log.d("Prediction", "failed to load "+filename);
+//        }
     }
     
     public Boolean predict(SummarizedEntry e) {
         Instances data = referenceData;
         int attrSize = referenceData.classIndex();
-        EntryInstance inst = new EntryInstance(attrSize);
+        EntryInstance inst = new EntryInstance(27); //hard coded the attribute size for now
         inst.setDataset(referenceData);
         if (refDataContains("Accx_mean"))
             inst.setValue(data.attribute("Accx_mean"), e.getAccx_mean());
@@ -142,7 +117,7 @@ public class PredictionModule {
         if(refDataContains("Gyrox_energy"))
             inst.setValue(data.attribute("Gyrox_energy"), e.getGyrox_energy());
         if(refDataContains("Gyroy_energy"))
-            inst.setValue(data.attribute("Gyroy_energy"), e.getGyrox_energy());
+            inst.setValue(data.attribute("Gyroy_energy"), e.getGyroy_energy());
         if(refDataContains("Gyrox_energy"))
             inst.setValue(data.attribute("Gyroz_energy"), e.getGyroz_energy());
         if(refDataContains("Accx_fdom"))
@@ -351,7 +326,7 @@ public class PredictionModule {
     {  
         Double average = 0.0;
         //System.out.println("SENSOR INDEX " + sensorIndex);
-        for ( int i = 0; i < windowSize; i++ )
+        for ( int i = 0; i < tempWindow.size(); i++ )
         {
             average += tempWindow.get(i).getSensors().get(sensorIndex);
             //System.out.print(tempWindow.get(i).getSensors().get(sensorIndex)+",");
@@ -363,7 +338,7 @@ public class PredictionModule {
     public Double calculateStdDev ( LinkedList<SensorEntry> tempWindow, int sensorIndex, Double mean )
     {
         Double stddev = 0.0;
-        for ( int i = 0; i < windowSize; i++ )
+        for ( int i = 0; i < tempWindow.size(); i++ )
         {
             stddev += Math.pow( ( tempWindow.get(i).getSensors().get(sensorIndex) - mean ), 2);
             // stddev += Math.pow( (tempSet.get(i).get(index) - mean), 2 );
@@ -375,7 +350,7 @@ public class PredictionModule {
     
     public Double calculateEnergy ( LinkedList<SensorEntry> tempWindow, int sensorIndex ){
         Double energy = 0.0;
-        for ( int i = 0; i < windowSize; i++ ){
+        for ( int i = 0; i < tempWindow.size(); i++ ){
             energy += Math.pow(tempWindow.get(i).getSensors().get(sensorIndex), 2);
         }
         return energy;
