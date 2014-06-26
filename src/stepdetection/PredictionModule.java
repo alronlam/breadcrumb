@@ -5,10 +5,8 @@
 
 package stepdetection;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.logging.Level;
@@ -18,6 +16,8 @@ import weka.classifiers.Classifier;
 import weka.core.Instances;
 import weka.core.SerializationHelper;
 import weka.core.converters.ConverterUtils;
+import android.content.res.AssetManager;
+import android.util.Log;
 import data.Complex;
 import data.EntryInstance;
 import data.SensorEntry;
@@ -36,6 +36,8 @@ public class PredictionModule {
     private Boolean prediction;
     private StringBuffer sb;
     private int entryFrequency = 100;
+    
+    private AssetManager assetManager;
     
     public PredictionModule(int classIndex, String type){
         sb = new StringBuffer("");
@@ -62,11 +64,12 @@ public class PredictionModule {
         // tag();
     }
     
-    public PredictionModule(){
-    	String modelPath = "assets/J4810050attrOverlapFreq.model";
+    public PredictionModule(AssetManager assetManager){
+    	this.assetManager = assetManager;
+    	String modelPath = "J48.model";
     	sb = new StringBuffer("");
     	this.windowSize= 100;
-    	referenceData = openFile("assets/summaries_referenceJ4810050.arff", 12);
+    	this.referenceData = openFile("references.arff", 12);
     	loadClassifier(modelPath);
     }
     
@@ -74,15 +77,16 @@ public class PredictionModule {
         return prediction;
     }
     
-    public Instances openFile(String filename, int classIndex) {
+    public Instances openFile(String fileName, int classIndex) {
         try {
-            ConverterUtils.DataSource source = new ConverterUtils.DataSource(filename);
+            ConverterUtils.DataSource source = new ConverterUtils.DataSource(assetManager.open(fileName));
             Instances data = source.getDataSet();
             data.setClassIndex(classIndex-1);
             return data;
             
         } catch (Exception ex) {
-            Logger.getLogger(PredictionModule.class.getName()).log(Level.SEVERE, null, ex);
+        	Log.e("PredictionModule", ex.toString());
+            //Logger.getLogger(PredictionModule.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
     }
@@ -90,10 +94,13 @@ public class PredictionModule {
     public void loadClassifier(String filename) {
         try {
             System.out.println("loading classifier..." + filename);
-            classifier = (Classifier) SerializationHelper.read(filename);
+            Log.d("Prediction", "trying to load "+filename);
+            classifier = (Classifier) SerializationHelper.read(assetManager.open(filename));
+            Log.d("Prediction", "finished loading "+filename);
         } catch (Exception ex) {
             Logger.getLogger(PredictionModule.class.getName()).log(Level.SEVERE, null, ex);
             System.err.println("loadclass " + filename);
+            Log.d("Prediction", "failed to load "+filename);
         }
     }
     

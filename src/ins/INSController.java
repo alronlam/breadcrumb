@@ -11,7 +11,9 @@ import stepdetection.PredictionModule;
 import stepdetection.StepDetector;
 import stridelengthestimation.LinearStrideLengthEstimator;
 import stridelengthestimation.StrideLengthEstimator;
-import android.util.Log;
+
+import com.example.breadcrumb.MainActivity;
+
 import data.BatchProcessingResults;
 import data.DetectedEntry;
 import data.SensorEntry;
@@ -23,12 +25,15 @@ public class INSController {
 	private StrideLengthEstimator strideLengthEstimator;
 	private HeadingDeterminer headingDeterminer;
 	private PredictionModule predictionModule;
+	private MainActivity mainActivity;
 	
-	public INSController(){
-		predictionModule = new PredictionModule();
+	public INSController(MainActivity mainActivity){
+		this.mainActivity = mainActivity;
+		predictionModule = new PredictionModule(mainActivity.getAssets());
 		this.stepDetector = new PeakThresholdStepDetector();
 		this.strideLengthEstimator = new LinearStrideLengthEstimator();
 		this.headingDeterminer = new SimpleHeadingDeterminer();
+		
 	}
 	
 	public BatchProcessingResults processSensorEntryBatch(ArrayList<SensorEntry> batch){

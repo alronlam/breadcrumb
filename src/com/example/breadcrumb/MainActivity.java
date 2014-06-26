@@ -3,6 +3,7 @@ package com.example.breadcrumb;
 import ins.INSController;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -15,8 +16,6 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.util.Log;
-import android.widget.TextView;
 import data.BatchProcessingResults;
 import data.SensorEntry;
 
@@ -39,7 +38,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private ArrayList<SensorEntry> sensorEntryBatch;
 	private SensorEntry nextSensorEntryToAdd;
 	
-	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,7 +50,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         registerListeners();
         
         sensorEntryBatch = new ArrayList<SensorEntry>();
-        insController = new INSController();
+        insController = new INSController(this);
         mapper = new TextMapper(this);
         nextSensorEntryToAdd = new SensorEntry();
         
@@ -108,11 +106,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 	 */
 	private void recordSensorEntry(){
 		this.nextSensorEntryToAdd.setTimeRecorded(System.nanoTime());
-		double x = nextSensorEntryToAdd.getOrient_x() ;
-		double y = nextSensorEntryToAdd.getOrient_y() ;
-		double z = nextSensorEntryToAdd.getOrient_z() ;
+		this.nextSensorEntryToAdd.buildSensorList();
 		
-    	
 		sensorEntryBatch.add(this.nextSensorEntryToAdd);
 		this.nextSensorEntryToAdd = new SensorEntry();
 	}
