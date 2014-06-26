@@ -62,6 +62,14 @@ public class PredictionModule {
         // tag();
     }
     
+    public PredictionModule(){
+    	String modelPath = "assets/J4810050attrOverlapFreq.model";
+    	sb = new StringBuffer("");
+    	this.windowSize= 100;
+    	referenceData = openFile("assets/summaries_referenceJ4810050.arff", 12);
+    	loadClassifier(modelPath);
+    }
+    
     public Boolean getPrediction(){
         return prediction;
     }
@@ -77,39 +85,6 @@ public class PredictionModule {
             Logger.getLogger(PredictionModule.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
-    }
-    
-    public LinkedList<SensorEntry> importFileToEntries ( String file ) {
-        FileReader fr;
-        String s;
-        LinkedList<SensorEntry> ses = new LinkedList<SensorEntry>();
-        try {
-            int i = 0;
-            fr = new FileReader(file);
-            BufferedReader br = new BufferedReader(fr);
-            while ( (s = br.readLine()) != null ){
-                SensorEntry se = new SensorEntry();
-                String[] columns = s.split(",");
-                // add date
-                se.setEntryNumber(i);
-                se.setAcc_x(Double.parseDouble(columns[0]));
-                se.setAcc_y(Double.parseDouble(columns[1]));
-                se.setAcc_z(Double.parseDouble(columns[2]));
-                se.setGyro_x(Double.parseDouble(columns[3]));
-                se.setGyro_y(Double.parseDouble(columns[4]));
-                se.setGyro_z(Double.parseDouble(columns[5]));
-                se.setOrient_y(Double.parseDouble(columns[6]));
-                se.buildSensorList();
-                // add gyro data
-                ses.add(se);
-                i++;
-            }
-            br.close();
-            fr.close();
-        } catch (FileNotFoundException ex) {
-        } catch (IOException ex) {
-        }
-        return ses;
     }
     
     public void loadClassifier(String filename) {
@@ -407,17 +382,5 @@ public class PredictionModule {
         return temp;
     }
     
-    public static void main (String[] args){
-        PredictionModule pm = new PredictionModule(26,"");
-        LinkedList<SensorEntry> entries = pm.importFileToEntries("C:\\Documents and Settings\\Chalsy\\Desktop\\DataCollectionPreprocessor\\Sample\\sample.csv");
-        pm.loadClassifier("C:\\Documents and Settings\\Chalsy\\Desktop\\DataCollectionPreprocessor\\Sample\\J4812INCModel.model");
-        
-        int cycles = entries.size() / 100;
-        for ( int i = 0; i < cycles; i++ ){
-            pm.predict(pm.summarizeEntries(pm.sublist(100, entries, i)));
-        }
-        
-        //System.out.println(pm.sb.toString());
-    }
 }
 

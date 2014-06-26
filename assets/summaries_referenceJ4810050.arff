@@ -1,0 +1,17 @@
+@relation summaries_reference
+
+@attribute Accx_stddev numeric
+@attribute Accy_stddev numeric
+@attribute Accy_energy numeric
+@attribute Accz_stddev numeric
+@attribute Accz_energy numeric
+@attribute Gyrox_stddev numeric
+@attribute Gyrox_energy numeric
+@attribute Gyroy_stddev numeric
+@attribute Gyroy_energy numeric
+@attribute Gyroz_stddev numeric
+@attribute Gyroz_energy numeric
+@attribute Class {'not walking',walking}
+
+@data
+5.645089,2.337529,3733.107529,1.0,1.15773,2.024412,543.858041,2.0,7.058473,2.06182,5407.314012,walking
