@@ -57,14 +57,8 @@ public class INSController {
 			results.setStrideLength(strideLength);
 			results.setHeadingAngle(headingAngle);
 			
-			
 		}
-		
-		
-		//Log.d("detected steps", detectedSteps.size()+"");
-//		Log.d("stride length", results.getStrideLength()+"");
-//		Log.d("heading angle", results.getHeadingAngle()+"");
-//		
+
 		return results;
 	}
 		

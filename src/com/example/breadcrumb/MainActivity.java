@@ -8,7 +8,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import mapping.Mapper;
-import mapping.TextMapper;
+import mapping.PathMapper;
 import android.app.Activity;
 import android.content.Context;
 import android.hardware.Sensor;
@@ -52,7 +52,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         
         sensorEntryBatch = new ArrayList<SensorEntry>();
         insController = new INSController(this);
-        mapper = new TextMapper(this);
+        mapper = new PathMapper(this);
         nextSensorEntryToAdd = new SensorEntry();
         
         timeStampOfLastStepDetection = System.nanoTime();
@@ -199,7 +199,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 	    	nextSensorEntryToAdd.setOrient_y(y);
 	    	nextSensorEntryToAdd.setOrient_z(z);
 	    	
-	    	TextMapper.debug("" + String.format("%.2f", x) + " " +String.format("%.2f", y) + " " + String.format("%.2f", z) );
+	    	PathMapper.debug("" + String.format("%.2f", x) + " " +String.format("%.2f", y) + " " + String.format("%.2f", z) );
 
 	    }
 	    
