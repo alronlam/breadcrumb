@@ -3,7 +3,7 @@ package com.example.breadcrumb;
 import ins.INSController;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -31,6 +31,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 //	private long timeStampOfLastSensorEntry = 0;
 //	private long sensorEntryTimeInterval = 1000/hz * 1000; //nano seconds
 	private long stepDetectorTimeInterval = 1000000000;
+	private boolean isModifyingSensorEntryBatch;
 	
 	//INS related
 	private INSController insController;
@@ -105,11 +106,13 @@ public class MainActivity extends Activity implements SensorEventListener {
 	 * Adds the object to the batch list, and then initializes a new empty SensorEntry for the next one.
 	 */
 	private void recordSensorEntry(){
-		this.nextSensorEntryToAdd.setTimeRecorded(System.nanoTime());
-		this.nextSensorEntryToAdd.buildSensorList();
-		
-		sensorEntryBatch.add(this.nextSensorEntryToAdd);
-		this.nextSensorEntryToAdd = new SensorEntry();
+		if(!isModifyingSensorEntryBatch){
+			this.nextSensorEntryToAdd.setTimeRecorded(System.nanoTime());
+			this.nextSensorEntryToAdd.buildSensorList();
+			
+			sensorEntryBatch.add(this.nextSensorEntryToAdd);
+			this.nextSensorEntryToAdd = new SensorEntry();
+		}
 	}
 	
 	/*
@@ -120,15 +123,31 @@ public class MainActivity extends Activity implements SensorEventListener {
     	 * For now, the sensor entries are being processed by the INS.
     	 * In the future, insert the phone mode detection here and just switch to INS or V-INS accordingly.
     	 */
-		BatchProcessingResults results = this.insController.processSensorEntryBatch((ArrayList<SensorEntry>)this.sensorEntryBatch.clone());
-		//clear the processed entries for the new batch
-		this.sensorEntryBatch.clear(); 
-
-//    	Log.d("Steps", results.getDetectedSteps()+"");
-//    	Log.d("Distance", results.getStrideLength()+"");
-//    	Log.d("Angle", results.getHeadingAngle()+"");
-		//feed the results to the mapping module
-		mapper.plot(this, results);
+		
+		int batchSize = this.sensorEntryBatch.size();
+		
+		if(batchSize >= 100){
+			
+			//just some race condition flag so that recordEntries won't concurrently modify the sensorEntryBatch
+			isModifyingSensorEntryBatch = true;
+			
+			//get only the first 100 
+			ArrayList<SensorEntry> toProcess = new ArrayList<SensorEntry>(this.sensorEntryBatch.subList(0, 100));
+			
+			//retain the next sensor entries as part of the next batch to process
+			this.sensorEntryBatch = new ArrayList<SensorEntry>(this.sensorEntryBatch.subList(100, batchSize));
+			
+			//just some race condition flag so that recordEntries won't concurrently modify the sensorEntryBatch
+			isModifyingSensorEntryBatch = false; //just some race condition flag
+			
+			
+			//process the 100 entries
+			BatchProcessingResults results = this.insController.processSensorEntryBatch(toProcess);
+		
+	
+			//feed the results to the mapping module
+			mapper.plot(this, results);
+		}
 	}
 
 	/* 
@@ -184,9 +203,9 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 	    }
 	    
-	    long currTime = System.nanoTime();
-	    if(currTime - this.timeStampOfLastStepDetection >= this.stepDetectorTimeInterval){
-	    	this.timeStampOfLastStepDetection = currTime;
+//	    long currTime = System.nanoTime();
+	    if(/*currTime - this.timeStampOfLastStepDetection >= this.stepDetectorTimeInterval || */this.sensorEntryBatch.size() >= 100){
+//	    	this.timeStampOfLastStepDetection = currTime;
 	    	processSensorEntries();
 	    }
 	}
