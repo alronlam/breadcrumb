@@ -31,7 +31,7 @@ public class MapView extends View {
     RectF basePathBounds = null;
     
     int val = 0;
-    String debugText;
+    String debugText = "";
     ScaleGestureDetector sDetector;
     
     double totalSteps;
