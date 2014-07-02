@@ -16,6 +16,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.util.Log;
 import data.BatchProcessingResults;
 import data.SensorEntry;
 
@@ -23,7 +24,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 	//Sensor variables
 	private SensorManager sensorManager;
-	private Sensor senAccelerometer, senGyroscope, senOrientation;
+	private Sensor senAccelerometer, senGyroscope, senOrientation, senProximity;
 	
 	//Time-related variables
 	private long hz = 100;
@@ -32,6 +33,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 //	private long sensorEntryTimeInterval = 1000/hz * 1000; //nano seconds
 	private long stepDetectorTimeInterval = 1000000000;
 	private boolean isModifyingSensorEntryBatch;
+	private boolean isInPocket;
 	
 	//INS related
 	private INSController insController;
@@ -48,6 +50,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         senAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         senGyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         senOrientation = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION); //temporary. not sure how to use the correct one
+        senProximity = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
         registerListeners();
         
         sensorEntryBatch = new ArrayList<SensorEntry>();
@@ -56,6 +59,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         nextSensorEntryToAdd = new SensorEntry();
         
         timeStampOfLastStepDetection = System.nanoTime();
+        isInPocket = false;
         
         startINS();
     }
@@ -73,7 +77,8 @@ public class MainActivity extends Activity implements SensorEventListener {
     private void registerListeners(){
         sensorManager.registerListener(this, senAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         sensorManager.registerListener(this, senGyroscope, SensorManager.SENSOR_DELAY_FASTEST);
-        sensorManager.registerListener(this,  senOrientation, SensorManager.SENSOR_DELAY_FASTEST);
+        sensorManager.registerListener(this, senOrientation, SensorManager.SENSOR_DELAY_FASTEST);
+        sensorManager.registerListener(this, senProximity, SensorManager.SENSOR_DELAY_FASTEST);
     }
 
 	@Override
@@ -127,7 +132,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 		int batchSize = this.sensorEntryBatch.size();
 		
 		if(batchSize >= 100){
-			
+			if(isInPocket){
 			//just some race condition flag so that recordEntries won't concurrently modify the sensorEntryBatch
 			isModifyingSensorEntryBatch = true;
 			
@@ -146,7 +151,17 @@ public class MainActivity extends Activity implements SensorEventListener {
 		
 	
 			//feed the results to the mapping module
-			mapper.plot(this, results);
+			mapper.plot(this, results);}
+			else{
+				isModifyingSensorEntryBatch = true;
+				
+				//retain the next sensor entries as part of the next batch to process
+				this.sensorEntryBatch = new ArrayList<SensorEntry>(this.sensorEntryBatch.subList(100, batchSize));
+				
+				//just some race condition flag so that recordEntries won't concurrently modify the sensorEntryBatch
+				isModifyingSensorEntryBatch = false; //just some race condition flag
+			}
+				
 		}
 	}
 
@@ -199,9 +214,20 @@ public class MainActivity extends Activity implements SensorEventListener {
 	    	nextSensorEntryToAdd.setOrient_y(y);
 	    	nextSensorEntryToAdd.setOrient_z(z);
 	    	
-	    	PathMapper.debug("" + String.format("%.2f", x) + " " +String.format("%.2f", y) + " " + String.format("%.2f", z) );
-
+	    	//PathMapper.debug("" + String.format("%.2f", x) + " " +String.format("%.2f", y) + " " + String.format("%.2f", z) );
 	    }
+	    else if (mySensor.getType() == Sensor.TYPE_PROXIMITY){
+	    	String str = "";
+	    	str += sensorEvent.values[0] + " ";
+	    	PathMapper.debug(str);
+		    Log.e("testy", "distance: " + str);
+		    if(sensorEvent.values[0] > 0)
+		    	isInPocket = false;
+		    else 
+		    	isInPocket = true;
+	    }
+	    
+	    
 	    
 //	    long currTime = System.nanoTime();
 	    if(/*currTime - this.timeStampOfLastStepDetection >= this.stepDetectorTimeInterval || */this.sensorEntryBatch.size() >= 100){
