@@ -43,7 +43,7 @@ public class PredictionModule {
     	this.assetManager = assetManager;
     	sb = new StringBuffer("");
     	this.windowSize= 100;
-    	this.referenceData = openFile("references.arff", 12);
+    	this.referenceData = openFile("references.arff", 27);
     	loadClassifier("");
     }
     
