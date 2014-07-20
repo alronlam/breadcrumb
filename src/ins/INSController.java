@@ -15,6 +15,7 @@ import stepdetection.SummarizedEntry;
 import stridelengthestimation.LinearStrideLengthEstimator;
 import stridelengthestimation.StrideLengthEstimator;
 import android.os.Environment;
+import android.util.Log;
 
 import com.example.breadcrumb.MainActivity;
 
@@ -76,11 +77,16 @@ public class INSController {
 		
 	private void logEntries(ArrayList<SensorEntry> batch){
 		try {
+			Log.e("INS Log", "Went in here");
+			FileOutputStream outputStream;
 			
-			FileOutputStream outputStream = new FileOutputStream(fileSummarized.getPath());	
-			
-			if(!fileSummarized.exists())
+			if(!fileSummarized.exists()){
+				fileSummarized.createNewFile();
+				outputStream = new FileOutputStream(fileSummarized);	
 				outputStream.write("Acc_x,Acc_y,Acc_z,Gyro_x,Gyro_y,Gyro_z,Orient_x,Orient_y,Orient_z,Time\n".getBytes());
+			}
+			else
+				outputStream = new FileOutputStream(fileSummarized, true);
 			
 			for(SensorEntry e: batch)
 				outputStream.write((e.toRawString()+","+e.getTimeRecorded()+"\n").getBytes());
@@ -88,6 +94,8 @@ public class INSController {
 			outputStream.close();
 			
 		} catch (Exception e) {
+
+			Log.e("INS Log", "Exception! "+e.toString());
 		  e.printStackTrace();
 		}
 	}
