@@ -3,7 +3,6 @@ package com.example.breadcrumb;
 import ins.INSController;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -15,6 +14,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.util.Log;
 import data.BatchProcessingResults;
@@ -72,6 +72,13 @@ public class MainActivity extends Activity implements SensorEventListener {
     protected void onResume() {
         super.onResume();
         registerListeners();
+    }
+    
+    protected void onDestroy(){
+    	super.onDestroy();
+    	
+    	MediaPlayer mediaPlayer = MediaPlayer.create(getBaseContext(), R.raw.airhorn);
+    	mediaPlayer.start();
     }
     
     private void registerListeners(){
