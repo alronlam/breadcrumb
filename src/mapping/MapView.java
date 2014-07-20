@@ -211,7 +211,6 @@ public class MapView extends View {
     	   
     	   paint.setColor(Color.BLACK);
        }
-       canvas.drawText("debug: " + saveCount, 50, 460, paint);
        
        
        // reference lines
