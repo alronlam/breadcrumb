@@ -2,15 +2,14 @@ package headingdetermination;
 
 import java.util.ArrayList;
 
-import android.util.Log;
 import data.SensorEntry;
 
 public class SimpleHeadingDeterminer implements HeadingDeterminer{
 
 	public double getHeading(ArrayList<SensorEntry> batch){
 		double avg = calculateAvg(batch);
-//		Log.d("Average angle is ", avg+"");
-		return getNearestDiscreteHeading(avg);
+		return avg;
+		//return getNearestDiscreteHeading(avg);
 	}
 	
 	//Might consider improving this by increasing the number of possible discrete angle values
