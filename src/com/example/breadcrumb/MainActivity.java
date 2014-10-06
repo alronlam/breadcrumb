@@ -5,6 +5,7 @@ import ins.INSController;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Semaphore;
 
 import mapping.Mapper;
 import mapping.PathMapper;
@@ -24,7 +25,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 	//Sensor variables
 	private SensorManager sensorManager;
-	private Sensor senAccelerometer, senGyroscope, senOrientation, senProximity;
+	private Sensor senAccelerometer, senGyroscope, senOrientation, senProximity, senMagnetometer;
 	
 	//Time-related variables
 	private long hz = 100;
@@ -41,6 +42,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private ArrayList<SensorEntry> sensorEntryBatch;
 	private SensorEntry nextSensorEntryToAdd;
 	
+	private Semaphore sensorEntryMutex = new Semaphore(1);
+	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,6 +54,8 @@ public class MainActivity extends Activity implements SensorEventListener {
         senGyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         senOrientation = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION); //temporary. not sure how to use the correct one
         senProximity = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+        
+        senMagnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         registerListeners();
         
         sensorEntryBatch = new ArrayList<SensorEntry>();
@@ -86,6 +91,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         sensorManager.registerListener(this, senGyroscope, SensorManager.SENSOR_DELAY_FASTEST);
         sensorManager.registerListener(this, senOrientation, SensorManager.SENSOR_DELAY_FASTEST);
         sensorManager.registerListener(this, senProximity, SensorManager.SENSOR_DELAY_FASTEST);
+        sensorManager.registerListener(this, senMagnetometer, SensorManager.SENSOR_DELAY_FASTEST);
     }
 
 	@Override
@@ -118,13 +124,13 @@ public class MainActivity extends Activity implements SensorEventListener {
 	 * Adds the object to the batch list, and then initializes a new empty SensorEntry for the next one.
 	 */
 	private void recordSensorEntry(){
-		if(!isModifyingSensorEntryBatch){
+		//if(!isModifyingSensorEntryBatch){
 			this.nextSensorEntryToAdd.setTimeRecorded(System.nanoTime());
 			this.nextSensorEntryToAdd.buildSensorList();
 			
 			sensorEntryBatch.add(this.nextSensorEntryToAdd);
 			this.nextSensorEntryToAdd = new SensorEntry();
-		}
+		//}
 	}
 	
 	/*
@@ -139,11 +145,12 @@ public class MainActivity extends Activity implements SensorEventListener {
 		int batchSize = this.sensorEntryBatch.size();
 		
 		if(batchSize >= 100){
-			if(isInPocket){
+			if(true){
 			//just some race condition flag so that recordEntries won't concurrently modify the sensorEntryBatch
 			isModifyingSensorEntryBatch = true;
 			
 			//get only the first 100 
+			// this is where concurrency dies
 			ArrayList<SensorEntry> toProcess = new ArrayList<SensorEntry>(this.sensorEntryBatch.subList(0, 100));
 			
 			//retain the next sensor entries as part of the next batch to process
