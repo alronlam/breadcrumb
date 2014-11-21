@@ -54,7 +54,7 @@ public class INSController {
 		BatchProcessingResults results = new BatchProcessingResults();
 		
 		//Negative Locomotion Classifier
-		if(predictionModule.predict(predictionModule.summarizeEntries(new LinkedList<SensorEntry>(batch)))){
+		if(true){//redictionModule.predict(predictionModule.summarizeEntries(new LinkedList<SensorEntry>(batch)))){
 			//Step detection
 			ArrayList<DetectedEntry> detectedSteps = stepDetector.detectSteps(batch);
 			
