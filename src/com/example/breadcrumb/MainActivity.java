@@ -49,6 +49,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private float ALPHA = .1f;
 	private float compass_last_measured_bearing = 0;
 
+	boolean gravUpdate, magUpdate;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -59,6 +61,9 @@ public class MainActivity extends Activity implements SensorEventListener {
 		senGyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
 		senOrientation = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION); // temporary. not sure how to use the correct one
 		senProximity = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+
+		gravUpdate = false;
+		magUpdate = false;
 
 		senGravity = sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);
 		senMagnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
@@ -249,9 +254,9 @@ public class MainActivity extends Activity implements SensorEventListener {
 			float y = sensorEvent.values[1];
 			float z = sensorEvent.values[2];
 
-			nextSensorEntryToAdd.setOrient_x(x);
-			nextSensorEntryToAdd.setOrient_y(y);
-			nextSensorEntryToAdd.setOrient_z(z);
+			// nextSensorEntryToAdd.setOrient_x(compass_last_measured_bearing);
+			// nextSensorEntryToAdd.setOrient_y(y);
+			// nextSensorEntryToAdd.setOrient_z(z);
 
 			// PathMapper.debug("" + String.format("%.2f", x) + " " +String.format("%.2f", y) + " " + String.format("%.2f", z) );
 		} else if (mySensor.getType() == Sensor.TYPE_PROXIMITY) {
@@ -266,11 +271,13 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 		} else if (mySensor.getType() == Sensor.TYPE_GRAVITY) {
 			mGrav = lowpass(sensorEvent.values.clone(), mGrav);
+			gravUpdate = true;
 		} else if (mySensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
 			mMag = lowpass(sensorEvent.values.clone(), mMag);
+			magUpdate = true;
 		}
 
-		if (mGrav != null && mMag != null) {
+		if (gravUpdate && magUpdate) {
 
 			float[] rotationMatrix = new float[9];
 			if (SensorManager.getRotationMatrix(rotationMatrix, null, mGrav, mMag)) {
@@ -300,6 +307,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 				PathMapper.debug(String.format("%.2f %.2f %.2f  ", orientation[0], orientation[1], orientation[2]));
 				// PathMapper.debug(String.format("%.2f %.2f %.2f", mMag[0], mMag[1], mMag[2]));
 			}
+			gravUpdate = false;
+			magUpdate = false;
 		}
 
 		// long currTime = System.nanoTime();
