@@ -59,7 +59,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 		sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 		senAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 		senGyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-		senOrientation = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION); // temporary. not sure how to use the correct one
+		senOrientation = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION); 
 		senProximity = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
 
 		gravUpdate = false;
@@ -92,9 +92,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 	protected void onDestroy() {
 		super.onDestroy();
-
-		// MediaPlayer mediaPlayer = MediaPlayer.create(getBaseContext(), R.raw.airhorn);
-		// mediaPlayer.start();
 	}
 
 	private void registerListeners() {
@@ -108,8 +105,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 	@Override
 	public void onAccuracyChanged(Sensor sensor, int arg1) {
-		// TODO Auto-generated method stub
-
 	}
 
 	private void startINS() {
@@ -120,15 +115,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 				recordSensorEntry();
 			}
 		}, 0, 10);
-
-		// Timer processTimer = new Timer();
-		// processTimer.scheduleAtFixedRate(new TimerTask() {
-		// @Override
-		// public void run() {
-		// processSensorEntries();
-		// }
-		//
-		// }, 0, 1000);
 	}
 
 	/*
@@ -164,13 +150,10 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 		if (batchSize >= 100) {
 			if (true) {
-				// just some race condition flag so that recordEntries won't concurrently modify the sensorEntryBatch
-				isModifyingSensorEntryBatch = true;
 
 				try {
 					this.sensorEntryMutex.acquire();
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 
@@ -181,9 +164,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 				// retain the next sensor entries as part of the next batch to process
 				this.sensorEntryBatch = new ArrayList<SensorEntry>(this.sensorEntryBatch.subList(100, batchSize));
 
-				// just some race condition flag so that recordEntries won't concurrently modify the sensorEntryBatch
-				isModifyingSensorEntryBatch = false; // just some race condition flag
-
 				this.sensorEntryMutex.release();
 
 				// process the 100 entries
@@ -192,7 +172,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 				// feed the results to the mapping module
 				mapper.plot(this, results);
 			} else {
-				isModifyingSensorEntryBatch = true;
 				try {
 					this.sensorEntryMutex.acquire();
 				} catch (InterruptedException e) {
@@ -204,8 +183,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 				this.sensorEntryBatch = new ArrayList<SensorEntry>(this.sensorEntryBatch.subList(100, batchSize));
 
 				this.sensorEntryMutex.release();
-				// just some race condition flag so that recordEntries won't concurrently modify the sensorEntryBatch
-				isModifyingSensorEntryBatch = false; // just some race condition flag
 			}
 
 		}
@@ -289,23 +266,20 @@ public class MainActivity extends Activity implements SensorEventListener {
 				float orientation[] = new float[3];
 				SensorManager.getOrientation(rotationMatrix, orientation);
 
-				float heading = 0;
-				if (heading < 0) {
-					heading += 360;
-				}
-
 				for (int i = 0; i < orientation.length; ++i) {
 					orientation[i] = (float) Math.toDegrees(orientation[i]);
 					if (orientation[i] < 0)
 						orientation[i] += 360;
 				}
+				
+				nextSensorEntryToAdd.setOrient_x(orientation[0]);
+				 nextSensorEntryToAdd.setOrient_y(orientation[1]);
+				 nextSensorEntryToAdd.setOrient_z(orientation[2]);
 
 				// current_measured_bearing = current_measured_bearing + ALPHA * (current_measured_bearing - compass_last_measured_bearing);
 
 				// compass_last_measured_bearing = current_measured_bearing;
-				// PathMapper.debug(""+heading);
 				PathMapper.debug(String.format("%.2f %.2f %.2f  ", orientation[0], orientation[1], orientation[2]));
-				// PathMapper.debug(String.format("%.2f %.2f %.2f", mMag[0], mMag[1], mMag[2]));
 			}
 			gravUpdate = false;
 			magUpdate = false;
