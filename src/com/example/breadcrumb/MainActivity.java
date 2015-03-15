@@ -9,6 +9,7 @@ import java.util.concurrent.Semaphore;
 
 import mapping.Mapper;
 import mapping.PathMapper;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.hardware.Sensor;
@@ -195,7 +196,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 	 * 
 	 * @see android.hardware.SensorEventListener#onSensorChanged(android.hardware.SensorEvent)
 	 */
-	@Override
+	@SuppressLint("NewApi") @Override
 	public void onSensorChanged(SensorEvent sensorEvent) {
 		// TODO Auto-generated method stub
 		Sensor mySensor = sensorEvent.sensor;
@@ -261,10 +262,15 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 				float[] remap = new float[9];
 
-				// SensorManager.remapCoordinateSystem(rotationMatrix, SensorManager.AXIS_X, SensorManager.AXIS_Z, remap);
+				SensorManager.remapCoordinateSystem(rotationMatrix, SensorManager.AXIS_MINUS_X, SensorManager.AXIS_Z, remap);
 
 				float orientation[] = new float[3];
-				SensorManager.getOrientation(rotationMatrix, orientation);
+				SensorManager.getOrientation(remap, orientation);
+
+//				float heading = 0;
+//				if (heading < 0) {
+//					heading += 360;
+//				}
 
 				for (int i = 0; i < orientation.length; ++i) {
 					orientation[i] = (float) Math.toDegrees(orientation[i]);
@@ -279,7 +285,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 				// current_measured_bearing = current_measured_bearing + ALPHA * (current_measured_bearing - compass_last_measured_bearing);
 
 				// compass_last_measured_bearing = current_measured_bearing;
-				PathMapper.debug(String.format("%.2f %.2f %.2f  ", orientation[0], orientation[1], orientation[2]));
+				PathMapper.debug(String.format("%.2f %.2f %.2f", orientation[0], orientation[1], orientation[2]));
 			}
 			gravUpdate = false;
 			magUpdate = false;
@@ -291,6 +297,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 			processSensorEntries();
 		}
 	}
+
+	
 
 	private float[] lowpass(float[] curr, float[] prev) {
 
